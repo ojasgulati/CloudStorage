@@ -23,8 +23,7 @@ public class FileService {
 
     public void uploadFile(MultipartFile documentFile) {
         try {
-            final String username = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-            final int userId = userService.getUser(username).getUserId();
+            final int userId = userService.getCurrentUserId();
             final String name = documentFile.getOriginalFilename();
             final String fileSize = String.valueOf(documentFile.getSize());
             final String contentType = documentFile.getContentType();
@@ -36,19 +35,23 @@ public class FileService {
     }
 
     public boolean isFileNameAlreadyPresent(String fileName) {
-        return fileMapper.getFileByName(fileName) != null;
+        final int userId = userService.getCurrentUserId();
+        return fileMapper.getFileByName(fileName, userId) != null;
     }
 
-    public List<File> getAllFiles(){
-        return fileMapper.getFiles();
+    public List<File> getAllFiles() {
+        final int userId = userService.getCurrentUserId();
+        return fileMapper.getFiles(userId);
     }
 
     @Transactional
-    public void deleteFile(int fileId){
-        fileMapper.deleteFile(fileId);
+    public void deleteFile(int fileId) {
+        final int userId = userService.getCurrentUserId();
+        fileMapper.deleteFile(fileId, userId);
     }
 
-    public File getFile(int fileId){
-        return fileMapper.getFileById(fileId);
+    public File getFile(int fileId) {
+        final int userId = userService.getCurrentUserId();
+        return fileMapper.getFileById(fileId, userId);
     }
 }

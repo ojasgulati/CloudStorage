@@ -1,72 +1,33 @@
 package com.udacity.jwdnd.course1.cloudstorage.controller;
 
-import com.udacity.jwdnd.course1.cloudstorage.model.File;
+import com.udacity.jwdnd.course1.cloudstorage.model.NoteForm;
+import com.udacity.jwdnd.course1.cloudstorage.services.CredentialsService;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
-import com.udacity.jwdnd.course1.cloudstorage.validator.FileValidator;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import com.udacity.jwdnd.course1.cloudstorage.services.NotesService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/home")
 public class HomeController {
 
     final FileService fileService;
+    final NotesService notesService;
+    final CredentialsService credentialsService;
 
-    public HomeController(final FileService fileService) {
+    public HomeController(FileService fileService, NotesService notesService, CredentialsService credentialsService) {
         this.fileService = fileService;
+        this.notesService = notesService;
+        this.credentialsService = credentialsService;
     }
 
     @GetMapping
-    public String getHome(final Model model) {
+    public String getHome(final Model model, @ModelAttribute("noteForm") NoteForm note) {
         model.addAttribute("files", fileService.getAllFiles());
+        model.addAttribute("notes", notesService.getNotes());
         return "home";
-    }
-
-    @PostMapping(path = "/fileupload")
-    public String fileUpload(@RequestParam("file") MultipartFile file, final Model model) {
-        FileValidator fileValidator = new FileValidator(fileService);
-        String error = fileValidator.validateFileUpload(file);
-        if (error != null) {
-            model.addAttribute("fileError", error);
-        } else {
-            fileService.uploadFile(file);
-        }
-        model.addAttribute("files", fileService.getAllFiles());
-        return "home";
-    }
-
-    @PostMapping(path = "/deletefile/{fileId}")
-    public String deleteFile(@PathVariable("fileId") int fileId, final Model model){
-        fileService.deleteFile(fileId);
-        model.addAttribute("files", fileService.getAllFiles());
-        return "home";
-    }
-
-    @GetMapping(path = "/file/{fileId}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable("fileId") int fileId) {
-
-        File file = fileService.getFile(fileId);
-        ByteArrayResource resource = new ByteArrayResource(file.getFileData());
-
-        HttpHeaders header = new HttpHeaders();
-        header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + file.getFileName());
-        header.add("Cache-Control", "no-cache, no-store, must-revalidate");
-        header.add("Pragma", "no-cache");
-        header.add("Expires", "0");
-
-        return ResponseEntity.ok()
-                .headers(header)
-                .contentLength(Long.parseLong(file.getFileSize()))
-                .contentType(MediaType.valueOf(file.getContentType()))
-                .body(resource);
     }
 }
