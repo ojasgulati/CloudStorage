@@ -1,5 +1,6 @@
 package com.udacity.jwdnd.course1.cloudstorage.controller;
 
+import com.udacity.jwdnd.course1.cloudstorage.model.CredentialForm;
 import com.udacity.jwdnd.course1.cloudstorage.model.NoteForm;
 import com.udacity.jwdnd.course1.cloudstorage.services.CredentialsService;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
@@ -25,9 +26,10 @@ public class HomeController {
     }
 
     @GetMapping
-    public String getHome(final Model model, @ModelAttribute("noteForm") NoteForm note) {
+    public String getHome(final Model model, @ModelAttribute("noteForm") NoteForm note, @ModelAttribute("credentialForm") CredentialForm credentialForm) {
         model.addAttribute("files", fileService.getAllFiles());
         model.addAttribute("notes", notesService.getNotes());
+        model.addAttribute("credentials", credentialsService.getCredentials());
         return "home";
     }
 }
