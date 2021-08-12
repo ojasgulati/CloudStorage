@@ -63,6 +63,7 @@ public class CredentialsService {
         credential.setCredentialId(credentialId);
         credential.setUrl(credentialForm.getUrl());
         credential.setCredKey(credKey);
+        credential.setUsername(credentialForm.getUsername());
         credential.setPassword(encryptedPassword);
         credentialsMapper.updateCredential(credential);
     }
